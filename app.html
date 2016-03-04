@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Jukely Checker</title>
+    <style>
+      body {
+        font-family: "Segoe UI", "Lucida Grande", Tahoma, sans-serif;
+        font-size: 100%;
+      }
+      #status {
+        /* avoid an excessively wide status text */
+        white-space: pre;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        max-width: 400px;
+      }
+    </style>
+
+    <script src="app.js"></script>
+    <script type="text/javascript" src="jquery-1.12.1.min.js"></script>
+  </head>
+  <body>
+    <div id="status"></div>
+    <div id='message' style="display:none;">Injecting Script....</div>
+    <div id='jukely-login-token' style="display:none;"></div>
+
+    <h3>Interested Events</h3>
+    <table id="jukely-currently-booking-table" border='1'>
+      <tr>
+        <th>Action</th>
+        <th>Booking status</th>
+        <th>Checked # of times</th>
+        <th>Spots</th>
+        <th>Headliner Name</th>
+        <th>Venue Name</th>
+      </tr>
+    </table>
+    <span id="previousSelectedText" style="display:none;">Please wait for previously selected interested events to load.</span>
+    <br>
+    <h3>Booked Events</h3>
+    <table id="jukely-booked-table" border='1'>
+      <tr>
+        <th>Booking status</th>
+        <th>Checked # of times</th>
+        <th>Spots</th>
+        <th>Headliner Name</th>
+        <th>Venue Name</th>
+      </tr>
+    </table>
+    <span id="previousBookedText" style="display:none;">Please wait for previously booked events to load.</span>
+    <br>
+    <h3>Event list</h3>
+    <table id="jukely-events-table" border='1'>
+      <tr>
+        <th>Action</th>
+        <th>Spots</th>
+        <th>Status</th>
+        <th>Booking Available</th>
+        <th>Headliner Name</th>
+        <th>Venue Name</th>
+      </tr>
+    </table>
+    <span id="availableSelectText" style="display:none;">Please wait for available events to load.</span>
+  </body>
+</html>
+
