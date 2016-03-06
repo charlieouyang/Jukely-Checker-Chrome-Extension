@@ -43,15 +43,17 @@ function getEvents(callback, errorCallback) {
       var eventObj;
       var trHTML = '';
       var eventStatus;
+      var date;
 
       for (var i=0; i<events.length; i++) {
         eventObj = events[i];
         eventStatus = eventObj.status === 1 ? "Open" : "Closed";
+        date = moment(eventObj.available_at);
         trHTML += '<tr id="' + eventObj.parse_id + '"><td>' + 
-          '<button class="addSelection" name="selection">Add</button>' + '</td><td>' + 
+          '<button type="button" class="addSelection btn btn-info" name="selection">Add</button>' + '</td><td class="numOfSpots">' + 
           '<input name="numOfSpots" id="input-' + eventObj.parse_id + '" style="width:20px;"/>' + '</td>' + 
           '<td><span name="status">' + eventStatus + '</span></td>' + 
-          '<td><span name="availableAt">' + eventObj.available_at + '</span></td>' + 
+          '<td><span name="availableAt">' + date.format('MMMM Do, h:mm:ss a') + '</span></td>' + 
           '<td><span name="headlinerName">' + eventObj.headliner.name + '</span></td>' + 
           '<td><span name="venueName">' + eventObj.venue.name + '</span></td></tr>';
       }
@@ -116,8 +118,10 @@ function onWindowLoad() {
 
   $("#availableSelectText").show();
 
+  $('[data-toggle="tooltip"]').tooltip();
+
   chrome.tabs.executeScript(null, {
-    file: "getPagesSource.js"
+    file: "js/getPagesSource.js"
   }, function() {
     // If you try and inject into an extensions page or the webstore/NTP you'll get an error
     if (chrome.runtime.lastError) {
@@ -143,7 +147,7 @@ function addInterestedEventHandler(e){
     eventObj.bookingStatus = "Checking...";
 
     trHTML = '<tr id="' + rowId + '">' + 
-      '<td><button class="removeSelection" data-id="' + rowId + '">Remove</button>' + '</td>' + 
+      '<td><button type="button" class="btn btn-warning removeSelection" data-id="' + rowId + '">Remove</button>' + '</td>' + 
       '<td><span name="bookingStatus" class="bookingStatus">Checking...</span></td>' + 
       '<td><span name="numOfTimesChecked" class="numOfTimesChecked">0</span></td>' + 
       '<td><span name="spots">' + numOfSpots + '</span></td>' + 
@@ -226,7 +230,7 @@ function reloadInterestedEventsTable(events) {
     var event = events[i];
 
     trHTML += '<tr id="' + event.parse_id + '">' + 
-      '<td><button class="removeSelection" data-id="' + event.parse_id + '">Remove</button>' + '</td>' + 
+      '<td><button type="button" class="btn btn-warning removeSelection" data-id="' + event.parse_id + '">Remove</button>' + '</td>' + 
       '<td><span name="bookingStatus" class="bookingStatus">Checking...</span></td>' + 
       '<td><span name="numOfTimesChecked" class="numOfTimesChecked">' + event.numOfTimesChecked + '</span></td>' + 
       '<td><span name="spots">' + event.numOfSpots + '</span></td>' + 
@@ -245,7 +249,6 @@ function reloadBookedEventsTable(events) {
   for (var i=0; i<events.length; i++) {
     var event = events[i];
 
-    debugger;
     trHTML += '<tr id="' + event.parse_id + '">' + 
       '<td><span name="bookingStatus" class="bookingStatus">Booked</span></td>' + 
       '<td><span name="numOfTimesChecked" class="numOfTimesChecked">' + event.numOfTimesChecked + '</span></td>' + 

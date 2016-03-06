@@ -45,10 +45,17 @@ chrome.runtime.onMessage.addListener(
     }
 
     if (request.jukelyCheckerAction === "checkForInterestedEvents") {
-      sendResponse({
-        previousEvents: interestedEvents.length > 0,
-        previousBooked: bookedEvents.length > 0
-      });
+      if (interestedEvents.length) {
+        sendResponse({
+          previousEvents: interestedEvents.length > 0,
+          previousBooked: bookedEvents.length > 0
+        });
+      } else {
+        sendResponse({
+          previousEvents: false,
+          previousBooked: false
+        });
+      }
     }
   });
 
