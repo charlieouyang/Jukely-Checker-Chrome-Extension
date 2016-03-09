@@ -70,13 +70,40 @@
       <a style="display: inline-block;" href="#" data-toggle="tooltip" data-placement="top" title="Available events that are available for you to book. If Events aren't loading, make sure you're currently on the jukely website, and logged in with your Facebook account.">
         <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
       </a>
+
+      <div class="dropdown city-dropdown">
+        <button class="btn btn-default dropdown-toggle city-button" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+          Select City
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+          <li><a value="atlanta">Atlanta</a></li>
+          <li><a value="austin">Austin</a></li>
+          <li><a value="chicago">Chicago</a></li>
+          <li><a value="dallas">Dallas</a></li>
+          <li><a value="denver">Denver</a></li>
+          <li><a value="houston">Houston</a></li>
+          <li><a value="london">London</a></li>
+          <li><a value="los-angeles">Los Angeles</a></li>
+          <li><a value="miami">Miami</a></li>
+          <li><a value="nashville">Nashville</a></li>
+          <li><a value="new-york">New York</a></li>
+          <li><a value="philadelphia">Philadelphia</a></li>
+          <li><a value="portland">Portland</a></li>
+          <li><a value="san-francisco">San Francisco</a></li>
+          <li><a value="seattle">Seattle</a></li>
+          <li><a value="toronto">Toronto</a></li>
+          <li><a value="washington-dc">Washington DC</a></li>
+        </ul>
+      </div>
     </div>
     <table id="jukely-events-table" class="table-bordered table-hover">
       <tr class="table-headers">
         <th>Action</th>
         <th>Spots</th>
         <th>Status</th>
-        <th style="width:160px;">Booking Available</th>
+        <th style="width:100px;">Booking Available</th>
+        <th style="width:80px;">Event Date</th>
         <th>Headliner Name</th>
         <th>Venue Name</th>
       </tr>

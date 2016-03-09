@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Jukely Checker",
   "description": "This extension allows you to repeatedly check for interested events and book them when they're available.",
-  "version": "2.0",
+  "version": "2.1",
   "browser_action": {
     "default_popup": "app.html"
   },

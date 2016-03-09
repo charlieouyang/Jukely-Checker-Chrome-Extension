@@ -1,4 +1,23 @@
 var jukelyCity = "new-york";
+var cityToValueTable = {
+  "atlanta": "Atlanta",
+  "austin": "Austin",
+  "chicago": "Chicago",
+  "dallas": "Dallas",
+  "denver": "Denver",
+  "houston": "Houston",
+  "london": "London",
+  "los-angeles": "Los Angeles",
+  "miami": "Miami",
+  "nashville": "Nashville",
+  "new-york": "New York",
+  "philadelphia": "Philadelphia",
+  "portland": "Portland",
+  "san-francisco": "San Francisco",
+  "seattle": "Seattle",
+  "toronto": "Toronto",
+  "washington-dc": "Washington DC"
+};
 
 function jukelyLogin(callback, errorCallback) {
   var http = new XMLHttpRequest();
@@ -43,17 +62,21 @@ function getEvents(callback, errorCallback) {
       var eventObj;
       var trHTML = '';
       var eventStatus;
-      var date;
+      var bookingDate;
+      var eventStart;
+      var dateDifference;
 
       for (var i=0; i<events.length; i++) {
         eventObj = events[i];
         eventStatus = eventObj.status === 1 ? "Open" : "Closed";
-        date = moment(eventObj.available_at);
+        bookingDate = moment(eventObj.available_at);
+        eventStart = moment(eventObj.starts_at);
         trHTML += '<tr id="' + eventObj.parse_id + '"><td>' + 
           '<button type="button" class="addSelection btn btn-info" name="selection">Add</button>' + '</td><td class="numOfSpots">' + 
           '<input name="numOfSpots" id="input-' + eventObj.parse_id + '" style="width:20px;"/>' + '</td>' + 
           '<td><span name="status">' + eventStatus + '</span></td>' + 
-          '<td><span name="availableAt">' + date.format('MMMM Do, h:mm:ss a') + '</span></td>' + 
+          '<td><span name="availableAt">' + getDateDifference(bookingDate) + '</span></td>' + 
+          '<td><span name="startsAt">' + eventStart.format('MMMM Do, h a') + '</span></td>' + 
           '<td><span name="headlinerName">' + eventObj.headliner.name + '</span></td>' + 
           '<td><span name="venueName">' + eventObj.venue.name + '</span></td></tr>';
       }
@@ -70,6 +93,20 @@ function getEvents(callback, errorCallback) {
   };
 
   http.send(null);
+
+  $("#availableSelectText").show();
+  $('#jukely-events-table').find("tr:gt(0)").remove();
+}
+
+function getDateDifference(dateInput) {
+  var now = moment();
+  var difference = dateInput.diff(now, 'minutes');
+
+  if (difference < 0) {
+    return "Already Available";
+  } else {
+    return dateInput.format('MMMM Do, h a');
+  }
 }
 
 var event = new Event('pageSourceGrabbed');
@@ -100,6 +137,7 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
     message.innerText = request.source;
     fbUid = request.source.match(/_fb_uid = '(.*?)'/)[1];
     fbAccessToken = request.source.match(/_fb_access_token = '(.*?)'/)[1];
+    jukelyCity = request.source.match(/"slug":"(.*?)"/)[1];
     document.dispatchEvent(event);
   }
 });
@@ -116,9 +154,39 @@ function onWindowLoad() {
     }
   });
 
+  chrome.runtime.sendMessage({
+    jukelyCheckerAction: "getJukelyCity"
+  }, function(response) {
+    if (response.jukelyCity) {
+      jukelyCity = response.jukelyCity;
+      $(".city-button:first-child").text(cityToValueTable[jukelyCity]);
+      $(".city-button:first-child").val(cityToValueTable[jukelyCity]);
+    }
+  });
+
   $("#availableSelectText").show();
 
   $('[data-toggle="tooltip"]').tooltip();
+
+  $(".dropdown-menu li a").click(function(){
+    $(".city-button:first-child").text($(this).text());
+    $(".city-button:first-child").val($(this).text());
+
+    jukelyCity = this.getAttribute("value");
+
+    chrome.runtime.sendMessage({
+      jukelyCheckerAction: "updateJukelyCity",
+      jukelyCity: jukelyCity
+    }, function(response) {
+      console.log(response);
+    });
+
+    getEvents(function() {
+      //debugger;
+    }, function() {
+      //Getting events error
+    });
+  });
 
   chrome.tabs.executeScript(null, {
     file: "js/getPagesSource.js"
@@ -145,6 +213,8 @@ function addInterestedEventHandler(e){
     }
     eventObj.numOfTimesChecked = 0;
     eventObj.bookingStatus = "Checking...";
+    eventObj.jukelyCity = jukelyCity;
+    eventObj.parse_id = rowId;
 
     trHTML = '<tr id="' + rowId + '">' + 
       '<td><button type="button" class="btn btn-warning removeSelection" data-id="' + rowId + '">Remove</button>' + '</td>' + 
@@ -228,14 +298,16 @@ function reloadInterestedEventsTable(events) {
   var trHTML = "";
   for (var i=0; i<events.length; i++) {
     var event = events[i];
+    var headlinerName = event.headlinerName ? event.headlinerName : event.headliner.name;
+    var venueName = event.venueName ? event.venueName : event.venue.name;
 
     trHTML += '<tr id="' + event.parse_id + '">' + 
       '<td><button type="button" class="btn btn-warning removeSelection" data-id="' + event.parse_id + '">Remove</button>' + '</td>' + 
       '<td><span name="bookingStatus" class="bookingStatus">Checking...</span></td>' + 
       '<td><span name="numOfTimesChecked" class="numOfTimesChecked">' + event.numOfTimesChecked + '</span></td>' + 
       '<td><span name="spots">' + event.numOfSpots + '</span></td>' + 
-      '<td><span name="headlinerName">' + event.headliner.name + '</span></td>' + 
-      '<td><span name="venueName">' + event.venue.name + '</span></td></tr>';
+      '<td><span name="headlinerName">' + headlinerName + '</span></td>' + 
+      '<td><span name="venueName">' + venueName + '</span></td></tr>';
   }
 
   $('#jukely-currently-booking-table tr:last').after(trHTML);
@@ -248,13 +320,15 @@ function reloadBookedEventsTable(events) {
   var trHTML = "";
   for (var i=0; i<events.length; i++) {
     var event = events[i];
+    var headlinerName = event.headlinerName ? event.headlinerName : event.headliner.name;
+    var venueName = event.venueName ? event.venueName : event.venue.name;
 
     trHTML += '<tr id="' + event.parse_id + '">' + 
       '<td><span name="bookingStatus" class="bookingStatus">Booked</span></td>' + 
       '<td><span name="numOfTimesChecked" class="numOfTimesChecked">' + event.numOfTimesChecked + '</span></td>' + 
       '<td><span name="spots">' + event.numOfSpots + '</span></td>' + 
-      '<td><span name="headlinerName">' + event.headliner.name + '</span></td>' + 
-      '<td><span name="venueName">' + event.venue.name + '</span></td></tr>';
+      '<td><span name="headlinerName">' + headlinerName + '</span></td>' + 
+      '<td><span name="venueName">' + venueName + '</span></td></tr>';
   }
 
   $('#jukely-booked-table tr:last').after(trHTML);

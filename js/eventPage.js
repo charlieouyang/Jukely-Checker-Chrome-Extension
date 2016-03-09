@@ -12,6 +12,15 @@ chrome.runtime.onMessage.addListener(
       sendResponse({ message: "jukelyAccessToken set ok" });
     }
 
+    if (request.jukelyCheckerAction === "updateJukelyCity") {
+      jukelyCity = request.jukelyCity;
+      sendResponse({ message: "jukelyCity set ok" });
+    }
+
+    if (request.jukelyCheckerAction === "getJukelyCity") {
+      sendResponse({ jukelyCity: jukelyCity });
+    }
+
     //Start checking for available events
     if (request.jukelyCheckerAction === "eventsCheckStart") {
       eventsCheckKeepGoing = true;
@@ -105,13 +114,23 @@ function checkForEvents() {
         }
 
         console.log(interested);
-        chrome.runtime.sendMessage({
-          jukelyCheckerAction: "eventsChecked",
-          interestedEvents: interested,
-          bookedEvents: bookedEvents
-        }, function(response) {
-          console.log(response);
-        });
+        if (!interested.length) {
+          chrome.runtime.sendMessage({
+            jukelyCheckerAction: "eventsChecked",
+            interestedEvents: interestedEvents,
+            bookedEvents: bookedEvents
+          }, function(response) {
+            console.log(response);
+          });
+        } else {
+          chrome.runtime.sendMessage({
+            jukelyCheckerAction: "eventsChecked",
+            interestedEvents: interested,
+            bookedEvents: bookedEvents
+          }, function(response) {
+            console.log(response);
+          });
+        }
 
         if (anyOpen) {
           for (var i = 0; i < interested.length; i++) {
